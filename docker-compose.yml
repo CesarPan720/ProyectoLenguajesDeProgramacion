@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: sistemaElectoral_sql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${MYSQL_PORT_HOST}:${MYSQL_PORT_CONTAINER}"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+    networks:
+      - sistemaElectoral_network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10 
+      start_period: 30s 
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: sistemaElectoral_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: ${MYSQL_PORT_CONTAINER}
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "${PMA_PORT_HOST}:80"
+    depends_on:
+      - mysql
+    networks:
+      - sistemaElectoral_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: sistemaElectoral_backend
+    restart: always
+    environment:
+      DB_HOST: mysql
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+      PYTHONUNBUFFERED: 1 # Permite ver los prints de Python en tiempo real en los logs de Docker
+    ports:
+      - "${BACKEND_PORT_HOST}:${BACKEND_PORT_CONTAINER}"
+    volumes:
+      - ./backend:/app
+    tty: true
+    stdin_open: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - sistemaElectoral_network
+
+  # ==============================================================
+  # APAGAMOS EL FRONTEND TEMPORALMENTE HASTA QUE DECIDAS QUÉ USAR
+  # ==============================================================
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: docker/Dockerfile.frontend
+  #   container_name: sistemaElectoral_frontend
+  #   restart: always
+  #   ports:
+  #     - "${FRONTEND_PORT_HOST}:${FRONTEND_PORT_CONTAINER}"
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - sistemaElectoral_network
+
+networks:
+  sistemaElectoral_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
