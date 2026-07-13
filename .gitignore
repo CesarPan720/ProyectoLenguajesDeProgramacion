@@ -1,0 +1,17 @@
+# Archivos temporales y compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs locales de auditoría (No se suben por seguridad)
+*.log
+auditoria_electoral.log
+
+# Archivos temporales de guardado atómico o corruptos
+*.tmp
+*.corrupto
+
+# Entornos virtuales (si decides usar uno en el futuro)
+venv/
+env/
+.venv/
