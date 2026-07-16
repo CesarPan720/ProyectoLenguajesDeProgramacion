@@ -4,14 +4,14 @@ FROM python:3.10-slim
 # Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Instalamos la librería necesaria para el gráfico
-RUN pip install matplotlib
-
-# Instalamos las librerías necesarias para el gráfico y la base de datos
-RUN pip install matplotlib mysql-connector-python
+# Instalamos las dependencias (FastAPI/uvicorn para la API, mysql-connector para la BD, matplotlib para analitica.py)
+COPY backend/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiamos todo el código de tu carpeta backend al contenedor
 COPY backend/ /app/
 
-# El comando que se ejecuta al encender el contenedor
-CMD ["python", "main.py"]
+# Levanta la API REST (el menú de consola sigue disponible manualmente con:
+# docker exec -it sistemaElectoral_backend python main.py)
+# Forma shell (no exec) para que ${BACKEND_PORT_CONTAINER} se expanda en tiempo de arranque.
+CMD uvicorn api:app --host 0.0.0.0 --port ${BACKEND_PORT_CONTAINER:-8000}

@@ -22,7 +22,8 @@ class GestorBaseDatos:
                 host=self.host,
                 user=self.user,
                 password=self.password,
-                database=self.database
+                database=self.database,
+                charset='utf8mb4'
             )
             if conexion.is_connected():
                 return conexion
