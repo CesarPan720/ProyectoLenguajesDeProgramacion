@@ -1,9 +1,18 @@
 <script setup>
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useCandidatosStore } from '@/stores/candidatos.store'
-import NavBar from '@/components/layout/NavBar.vue'
 
 const candidatosStore = useCandidatosStore()
+
+const ranking = computed(() =>
+  candidatosStore.resultados
+    .filter((r) => r.nombre !== 'Voto en Blanco')
+    .slice()
+    .sort((a, b) => b.porcentaje - a.porcentaje)
+)
+const votoEnBlanco = computed(() =>
+  candidatosStore.resultados.find((r) => r.nombre === 'Voto en Blanco')
+)
 
 onMounted(() => {
   candidatosStore.cargarResultados()
@@ -11,24 +20,37 @@ onMounted(() => {
 </script>
 
 <template>
-  <NavBar />
-  <main class="max-w-2xl mx-auto mt-10 px-4">
-    <h2 class="text-xl font-semibold mb-2 text-gray-800">Reporte de Resultados</h2>
-    <p class="text-gray-600 mb-6">Total de votos emitidos: {{ candidatosStore.totalVotos }}</p>
+  <main class="max-w-lg mx-auto mt-12 px-4">
+    <h2 class="text-2xl font-extrabold text-gray-900">Resultados</h2>
+    <p class="text-sm text-gray-500 mb-5">Elección presidencial</p>
 
-    <div class="space-y-3">
+    <div class="bg-white rounded-2xl shadow-md divide-y divide-gray-100 overflow-hidden">
       <div
-        v-for="item in candidatosStore.resultados"
+        v-for="(item, idx) in ranking"
         :key="item.nombre"
-        class="bg-white rounded-lg shadow-md p-4"
+        class="px-5 py-4"
       >
-        <div class="flex justify-between mb-1">
-          <span class="font-medium text-gray-800">{{ item.nombre }}</span>
-          <span class="text-sm text-gray-500">{{ item.votos }} votos ({{ item.porcentaje }}%)</span>
+        <div class="flex items-baseline justify-between mb-2">
+          <span class="font-semibold text-gray-900">{{ idx + 1 }} · {{ item.nombre }}</span>
+          <span class="font-bold text-gray-900">{{ item.porcentaje }}%</span>
         </div>
-        <div class="w-full bg-gray-200 rounded-full h-2.5">
-          <div class="bg-blue-600 h-2.5 rounded-full" :style="{ width: item.porcentaje + '%' }" />
+        <div class="w-full bg-gray-100 rounded-full h-2">
+          <div class="bg-cyan-600 h-2 rounded-full" :style="{ width: item.porcentaje + '%' }" />
         </div>
+      </div>
+
+      <div v-if="votoEnBlanco" class="px-5 py-4">
+        <div class="flex items-baseline justify-between mb-2">
+          <span class="text-gray-500">Voto en blanco</span>
+          <span class="font-medium text-gray-500">{{ votoEnBlanco.porcentaje }}%</span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2">
+          <div class="bg-gray-400 h-2 rounded-full" :style="{ width: votoEnBlanco.porcentaje + '%' }" />
+        </div>
+      </div>
+
+      <div class="px-5 py-3 text-xs text-gray-400">
+        Total de votos emitidos: {{ candidatosStore.totalVotos }}
       </div>
     </div>
   </main>
