@@ -1,3 +1,5 @@
+"""Punto de entrada del menú de consola (Paradigma Estructurado)."""
+
 from servicios.sistema_electoral import SistemaElectoral
 from vistas.menu_consola import ejecutar_menu_votacion
 
