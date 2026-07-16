@@ -51,37 +51,37 @@ services:
       DB_USER: ${MYSQL_USER}
       DB_PASSWORD: ${MYSQL_PASSWORD}
       DB_NAME: ${MYSQL_DATABASE}
+      FRONTEND_ORIGIN: http://localhost:${FRONTEND_PORT_HOST}
+      BACKEND_PORT_CONTAINER: ${BACKEND_PORT_CONTAINER}
       PYTHONUNBUFFERED: 1 # Permite ver los prints de Python en tiempo real en los logs de Docker
     ports:
       - "${BACKEND_PORT_HOST}:${BACKEND_PORT_CONTAINER}"
     volumes:
       - ./backend:/app
-    tty: true
-    stdin_open: true
     depends_on:
       mysql:
         condition: service_healthy
     networks:
       - sistemaElectoral_network
 
-  # ==============================================================
-  # APAGAMOS EL FRONTEND TEMPORALMENTE HASTA QUE DECIDAS QUÉ USAR
-  # ==============================================================
-  # frontend:
-  #   build:
-  #     context: .
-  #     dockerfile: docker/Dockerfile.frontend
-  #   container_name: sistemaElectoral_frontend
-  #   restart: always
-  #   ports:
-  #     - "${FRONTEND_PORT_HOST}:${FRONTEND_PORT_CONTAINER}"
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
-  #   depends_on:
-  #     - backend
-  #   networks:
-  #     - sistemaElectoral_network
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: sistemaElectoral_frontend
+    restart: always
+    environment:
+      VITE_API_URL: http://localhost:${BACKEND_PORT_HOST}/api
+      FRONTEND_PORT_CONTAINER: ${FRONTEND_PORT_CONTAINER}
+    ports:
+      - "${FRONTEND_PORT_HOST}:${FRONTEND_PORT_CONTAINER}"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - sistemaElectoral_network
 
 networks:
   sistemaElectoral_network:

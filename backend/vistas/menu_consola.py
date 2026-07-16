@@ -1,11 +1,15 @@
+"""Vista de consola (Paradigma Estructurado): menú, iteraciones y manejo de excepciones."""
+
 import os
 from servicios.sistema_electoral import SistemaElectoral
 import servicios.analitica as analitica
 
 def limpiar_pantalla():
+    """Limpia la terminal, sea Windows (cls) o Unix (clear)."""
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def ejecutar_menu_votacion(sistema: SistemaElectoral):
+    """Bucle principal del menú: votar o ver resultados, hasta que el usuario salga."""
     while True:
         limpiar_pantalla()
         print("=========================================")
@@ -33,7 +37,8 @@ def ejecutar_menu_votacion(sistema: SistemaElectoral):
                 print("=========================================")
                 
                 seleccion = input("\nIngrese el número de su opción: ").strip()
-                
+
+                # input() siempre devuelve str: se valida a mano que sea un entero antes de convertir.
                 if not seleccion.isdigit():
                     raise TypeError("La selección debe ser un número entero.")
                 
