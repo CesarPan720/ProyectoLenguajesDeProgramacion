@@ -4,8 +4,10 @@ export function obtenerCandidatos() {
   return api.get('/candidatos').then((res) => res.data)
 }
 
-export function emitirVoto(dni, idCandidato) {
-  return api.post('/votos', { dni, id_candidato: idCandidato }).then((res) => res.data)
+export function emitirVoto(dni, fechaNacimiento, idCandidato) {
+  return api
+    .post('/votos', { dni, fecha_nacimiento: fechaNacimiento, id_candidato: idCandidato })
+    .then((res) => res.data)
 }
 
 export function obtenerResultados() {

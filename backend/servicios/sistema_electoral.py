@@ -19,7 +19,7 @@ class SistemaElectoral:
         registros = self.db.ejecutar_consulta(query)
         
         for fila in registros:
-            cand = Candidato(fila['id_candidato'], fila['nombre'], fila['partido'])
+            cand = Candidato(fila['id_candidato'], fila['nombre'], fila['partido'], fila['simbolo'], fila['foto'])
             cand.votos = fila['votos']
             self.candidatos[cand.id] = cand
 

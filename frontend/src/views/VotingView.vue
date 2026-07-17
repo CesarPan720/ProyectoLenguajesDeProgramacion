@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { useCandidatosStore } from '@/stores/candidatos.store'
+import { API_ORIGIN } from '@/services/api'
 import BaseAlert from '@/components/common/BaseAlert.vue'
 
 const auth = useAuthStore()
@@ -53,7 +54,7 @@ function volverAElegir() {
 
 async function confirmarVoto() {
   votando.value = true
-  const ok = await candidatosStore.votar(auth.dni, seleccionado.value)
+  const ok = await candidatosStore.votar(auth.dni, auth.fechaNacimiento, seleccionado.value)
   votando.value = false
 
   if (ok) {
@@ -82,7 +83,20 @@ async function confirmarVoto() {
           {{ numeroSeleccionado }}
         </span>
         <span v-else class="w-8 h-8 rounded-lg border-2 border-gray-900 shrink-0" />
-        <span class="w-9 h-9 rounded-lg bg-white flex items-center justify-center shrink-0">
+        <span v-if="candidatoSeleccionado?.foto" class="relative w-9 h-9 shrink-0">
+          <img
+            :src="`${API_ORIGIN}${candidatoSeleccionado.foto}`"
+            :alt="candidatoSeleccionado.nombre"
+            class="w-9 h-9 rounded-lg object-cover"
+          />
+          <img
+            v-if="candidatoSeleccionado.simbolo"
+            :src="`${API_ORIGIN}${candidatoSeleccionado.simbolo}`"
+            :alt="`Símbolo de ${candidatoSeleccionado.nombre}`"
+            class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full ring-2 ring-white bg-white object-cover"
+          />
+        </span>
+        <span v-else class="w-9 h-9 rounded-lg bg-white flex items-center justify-center shrink-0">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-cyan-700">
             <circle cx="12" cy="8" r="3.2" />
             <path d="M5 20.5c0-3.6 3.1-6 7-6s7 2.4 7 6" />
@@ -148,7 +162,20 @@ async function confirmarVoto() {
           <span class="w-7 h-7 rounded-md bg-cyan-600 text-white text-sm font-bold flex items-center justify-center shrink-0">
             {{ idx + 1 }}
           </span>
-          <span class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+          <span v-if="candidato.foto" class="relative w-9 h-9 shrink-0">
+            <img
+              :src="`${API_ORIGIN}${candidato.foto}`"
+              :alt="candidato.nombre"
+              class="w-9 h-9 rounded-lg object-cover"
+            />
+            <img
+              v-if="candidato.simbolo"
+              :src="`${API_ORIGIN}${candidato.simbolo}`"
+              :alt="`Símbolo de ${candidato.nombre}`"
+              class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full ring-2 ring-white bg-white object-cover"
+            />
+          </span>
+          <span v-else class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-400">
               <circle cx="12" cy="8" r="3.2" />
               <path d="M5 20.5c0-3.6 3.1-6 7-6s7 2.4 7 6" />

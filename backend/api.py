@@ -9,6 +9,7 @@ import os
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from servicios.sistema_electoral import SistemaElectoral
 from servicios import analitica
@@ -24,8 +25,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Sirve las fotos/símbolos de los candidatos (backend/static/candidatos/...) en /static/...
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # Instancia única compartida por todas las peticiones (mismo rol que en main.py).
 sistema = SistemaElectoral()
+
+
+def _ruta_estatica(valor: str | None) -> str | None:
+    """Convierte un nombre de archivo guardado en BD en una URL servida por /static."""
+    return f"/static/{valor}" if valor else None
 
 
 @app.get("/api/health")
@@ -36,9 +45,9 @@ def salud():
 
 @app.post("/api/auth/verificar")
 def verificar_identidad(payload: VerificarDniRequest):
-    """Valida que el DNI exista en el padrón y no haya votado todavía."""
+    """Valida que el DNI y la fecha de nacimiento coincidan con el padrón y que no haya votado."""
     try:
-        sistema.auth_service.verificar_identidad(payload.dni)
+        sistema.auth_service.verificar_identidad(payload.dni, payload.fecha_nacimiento)
         return {"dni": payload.dni, "verificado": True}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -54,7 +63,13 @@ def listar_candidatos():
     try:
         sistema.cargar_candidatos()
         return [
-            {"id": c.id, "nombre": c.nombre, "partido": c.partido}
+            {
+                "id": c.id,
+                "nombre": c.nombre,
+                "partido": c.partido,
+                "simbolo": _ruta_estatica(c.simbolo),
+                "foto": _ruta_estatica(c.foto),
+            }
             for c in sistema.candidatos.values()
         ]
     except RuntimeError as e:
@@ -70,7 +85,7 @@ def emitir_voto(payload: VotoRequest):
     directamente sin haber pasado antes por la verificación.
     """
     try:
-        sistema.auth_service.verificar_identidad(payload.dni)
+        sistema.auth_service.verificar_identidad(payload.dni, payload.fecha_nacimiento)
         sistema.registrar_voto(payload.dni, payload.id_candidato)
         return {"mensaje": "Voto registrado correctamente."}
     except ValueError as e:
