@@ -11,7 +11,16 @@ auditoria_electoral.log
 *.tmp
 *.corrupto
 
-# Entornos virtuales (si decides usar uno en el futuro)
+# Entornos virtuales
 venv/
 env/
 .venv/
+
+# =========================================
+# REGLAS AÑADIDAS PARA DOCKER Y EL PROYECTO
+# =========================================
+
+# Variables de entorno y credenciales (CRÍTICO POR SEGURIDAD)
+.env
+
+# Dependencias del futuro frontend

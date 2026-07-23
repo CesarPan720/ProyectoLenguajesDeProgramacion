@@ -1,0 +1,12 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY frontend/package*.json ./
+RUN npm install
+
+COPY frontend/ .
+
+# Servidor de desarrollo de Vite, expuesto para poder mapearlo al host.
+# Forma shell (no exec) para que ${FRONTEND_PORT_CONTAINER} se expanda en tiempo de arranque.
+CMD npm run dev -- --host 0.0.0.0 --port ${FRONTEND_PORT_CONTAINER:-5173}
