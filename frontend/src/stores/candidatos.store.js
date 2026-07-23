@@ -12,10 +12,10 @@ export const useCandidatosStore = defineStore('candidatos', {
     async cargarCandidatos() {
       this.candidatos = await obtenerCandidatos()
     },
-    async votar(dni, idCandidato) {
+    async votar(dni, fechaNacimiento, idCandidato) {
       this.error = null
       try {
-        await emitirVoto(dni, idCandidato)
+        await emitirVoto(dni, fechaNacimiento, idCandidato)
         return true
       } catch (err) {
         this.error = err.response?.data?.detail ?? 'No se pudo registrar el voto.'

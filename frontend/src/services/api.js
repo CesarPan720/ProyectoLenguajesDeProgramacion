@@ -7,4 +7,7 @@ const api = axios.create({
   }
 })
 
+// Origen del backend (sin el sufijo /api) para armar URLs de archivos estáticos (fotos/símbolos).
+export const API_ORIGIN = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '')
+
 export default api

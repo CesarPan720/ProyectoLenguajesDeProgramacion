@@ -1,5 +1,7 @@
 import api from './api'
 
-export function verificarIdentidad(dni) {
-  return api.post('/auth/verificar', { dni }).then((res) => res.data)
+export function verificarIdentidad(dni, fechaNacimiento) {
+  return api
+    .post('/auth/verificar', { dni, fecha_nacimiento: fechaNacimiento })
+    .then((res) => res.data)
 }

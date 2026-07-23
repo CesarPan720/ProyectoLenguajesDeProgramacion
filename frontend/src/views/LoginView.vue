@@ -6,7 +6,6 @@ import { esDniValido } from '@/utils/validadores'
 import BaseAlert from '@/components/common/BaseAlert.vue'
 
 const dni = ref('')
-// Solo decorativo: no participa en la verificación de identidad ni en el registro del voto.
 const fechaNacimiento = ref('')
 
 const cargando = ref(false)
@@ -22,8 +21,13 @@ async function onSubmit() {
     return
   }
 
+  if (!fechaNacimiento.value) {
+    errorFormato.value = 'Debe ingresar su fecha de nacimiento.'
+    return
+  }
+
   cargando.value = true
-  const ok = await auth.verificar(dni.value)
+  const ok = await auth.verificar(dni.value, fechaNacimiento.value)
   cargando.value = false
 
   if (ok) {
@@ -74,6 +78,7 @@ async function onSubmit() {
                 <input
                   v-model="fechaNacimiento"
                   type="date"
+                  required
                   class="w-full rounded-lg border-0 px-4 py-2.5 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-800"
                 />
               </div>

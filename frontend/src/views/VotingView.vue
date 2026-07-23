@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
 import { useCandidatosStore } from '@/stores/candidatos.store'
+import { API_ORIGIN } from '@/services/api'
 import BaseAlert from '@/components/common/BaseAlert.vue'
 
 const auth = useAuthStore()
@@ -53,7 +54,7 @@ function volverAElegir() {
 
 async function confirmarVoto() {
   votando.value = true
-  const ok = await candidatosStore.votar(auth.dni, seleccionado.value)
+  const ok = await candidatosStore.votar(auth.dni, auth.fechaNacimiento, seleccionado.value)
   votando.value = false
 
   if (ok) {
@@ -65,32 +66,45 @@ async function confirmarVoto() {
 </script>
 
 <template>
-  <main class="max-w-lg mx-auto mt-12 px-4">
+  <main class="max-w-3xl mx-auto mt-12 px-4">
     <BaseAlert v-if="exito" variant="success" class="mb-4">
       ¡Su voto ha sido registrado correctamente!
     </BaseAlert>
 
     <template v-else-if="paso === 'confirmacion'">
-      <h2 class="text-2xl font-extrabold text-gray-900">Confirma tu voto</h2>
-      <p class="text-sm text-gray-500 mb-5">Revisa que la selección sea correcta</p>
+      <h2 class="text-3xl font-extrabold text-gray-900">Confirma tu voto</h2>
+      <p class="text-base text-gray-500 mb-6">Revisa que la selección sea correcta</p>
 
-      <div class="flex items-center gap-3 rounded-xl bg-[#6fcde8] p-4 mb-4">
+      <div class="flex items-center gap-4 rounded-2xl bg-[#6fcde8] p-5 mb-4">
         <span
           v-if="numeroSeleccionado"
-          class="w-8 h-8 rounded-lg bg-gray-900 text-white text-sm font-bold flex items-center justify-center shrink-0"
+          class="w-9 h-9 rounded-lg bg-gray-900 text-white text-lg font-bold flex items-center justify-center shrink-0"
         >
           {{ numeroSeleccionado }}
         </span>
-        <span v-else class="w-8 h-8 rounded-lg border-2 border-gray-900 shrink-0" />
-        <span class="w-9 h-9 rounded-lg bg-white flex items-center justify-center shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-cyan-700">
+        <span v-else class="w-9 h-9 rounded-lg border-2 border-gray-900 shrink-0" />
+        <span v-if="candidatoSeleccionado?.foto" class="relative w-20 h-20 shrink-0">
+          <img
+            :src="`${API_ORIGIN}${candidatoSeleccionado.foto}`"
+            :alt="candidatoSeleccionado.nombre"
+            class="w-20 h-20 rounded-xl object-cover"
+          />
+          <img
+            v-if="candidatoSeleccionado.simbolo"
+            :src="`${API_ORIGIN}${candidatoSeleccionado.simbolo}`"
+            :alt="`Símbolo de ${candidatoSeleccionado.nombre}`"
+            class="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-full ring-2 ring-white bg-white object-cover"
+          />
+        </span>
+        <span v-else class="w-20 h-20 rounded-xl bg-white flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 text-cyan-700">
             <circle cx="12" cy="8" r="3.2" />
             <path d="M5 20.5c0-3.6 3.1-6 7-6s7 2.4 7 6" />
           </svg>
         </span>
         <span>
-          <p class="font-semibold text-gray-900 leading-tight">{{ candidatoSeleccionado?.nombre }}</p>
-          <p class="text-xs text-gray-700">{{ candidatoSeleccionado?.partido }}</p>
+          <p class="font-semibold text-gray-900 leading-tight text-xl">{{ candidatoSeleccionado?.nombre }}</p>
+          <p class="text-sm text-gray-700">{{ candidatoSeleccionado?.partido }}</p>
         </span>
       </div>
 
@@ -134,42 +148,55 @@ async function confirmarVoto() {
     </template>
 
     <template v-else>
-      <h2 class="text-2xl font-extrabold text-gray-900">Elección presidencial</h2>
-      <p class="text-sm text-gray-500 mb-5">Marca una sola opción</p>
+      <h2 class="text-3xl font-extrabold text-gray-900">Elección presidencial</h2>
+      <p class="text-base text-gray-500 mb-6">Marca una sola opción</p>
 
-      <form class="space-y-3" @submit.prevent="irAConfirmacion">
+      <form class="space-y-4" @submit.prevent="irAConfirmacion">
         <label
           v-for="(candidato, idx) in candidatosReales"
           :key="candidato.id"
-          class="flex items-center gap-3 rounded-xl border-2 p-3 cursor-pointer transition-colors"
+          class="flex items-center gap-4 rounded-2xl border-2 p-4 cursor-pointer transition-colors"
           :class="seleccionado === candidato.id ? 'border-cyan-600 bg-cyan-50' : 'border-gray-200 bg-white hover:border-gray-300'"
         >
-          <input v-model="seleccionado" type="radio" :value="candidato.id" class="w-5 h-5 accent-cyan-700" />
-          <span class="w-7 h-7 rounded-md bg-cyan-600 text-white text-sm font-bold flex items-center justify-center shrink-0">
+          <input v-model="seleccionado" type="radio" :value="candidato.id" class="w-6 h-6 accent-cyan-700" />
+          <span class="w-9 h-9 rounded-lg bg-cyan-600 text-white text-lg font-bold flex items-center justify-center shrink-0">
             {{ idx + 1 }}
           </span>
-          <span class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-400">
+          <span v-if="candidato.foto" class="relative w-20 h-20 shrink-0">
+            <img
+              :src="`${API_ORIGIN}${candidato.foto}`"
+              :alt="candidato.nombre"
+              class="w-20 h-20 rounded-xl object-cover"
+            />
+            <img
+              v-if="candidato.simbolo"
+              :src="`${API_ORIGIN}${candidato.simbolo}`"
+              :alt="`Símbolo de ${candidato.nombre}`"
+              class="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-full ring-2 ring-white bg-white object-cover"
+            />
+          </span>
+          <span v-else class="w-20 h-20 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 text-gray-400">
               <circle cx="12" cy="8" r="3.2" />
               <path d="M5 20.5c0-3.6 3.1-6 7-6s7 2.4 7 6" />
             </svg>
           </span>
           <span>
-            <p class="font-semibold text-gray-900 leading-tight">{{ candidato.nombre }}</p>
-            <p class="text-xs text-gray-500">{{ candidato.partido }}</p>
+            <p class="font-semibold text-gray-900 leading-tight text-lg">{{ candidato.nombre }}</p>
+            <p class="text-sm text-gray-500">{{ candidato.partido }}</p>
           </span>
         </label>
 
-        <div v-if="votoEnBlanco" class="border-t border-dashed border-gray-300 !mt-5 !mb-3" />
+        <div v-if="votoEnBlanco" class="border-t border-dashed border-gray-300 !mt-6 !mb-4" />
 
         <label
           v-if="votoEnBlanco"
-          class="flex items-center gap-3 rounded-xl border-2 border-dashed p-3 cursor-pointer transition-colors"
+          class="flex items-center gap-4 rounded-2xl border-2 border-dashed p-4 cursor-pointer transition-colors"
           :class="seleccionado === votoEnBlanco.id ? 'border-cyan-600 bg-cyan-50' : 'border-gray-300 bg-white hover:border-gray-400'"
         >
-          <input v-model="seleccionado" type="radio" :value="votoEnBlanco.id" class="w-5 h-5 accent-cyan-700" />
-          <span class="w-7 h-7 rounded-md border-2 border-gray-300 shrink-0" />
-          <span class="font-medium text-gray-700">Voto en blanco</span>
+          <input v-model="seleccionado" type="radio" :value="votoEnBlanco.id" class="w-6 h-6 accent-cyan-700" />
+          <span class="w-9 h-9 rounded-lg border-2 border-gray-300 shrink-0" />
+          <span class="font-medium text-gray-700 text-lg">Voto en blanco</span>
         </label>
 
         <BaseAlert v-if="errorSeleccion" variant="error">{{ errorSeleccion }}</BaseAlert>
