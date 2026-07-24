@@ -1,7 +1,4 @@
-"""API REST (FastAPI): expone SistemaElectoral/ServicioAutenticacion/analitica por HTTP
-para que el frontend web pueda votar sin pasar por el menú de consola.
-
-Cada endpoint traduce las excepciones ya definidas en la capa de servicios
+"""Cada endpoint traduce las excepciones ya definidas en la capa de servicios
 (ValueError, PermissionError, KeyError, RuntimeError) a códigos de estado HTTP.
 """
 

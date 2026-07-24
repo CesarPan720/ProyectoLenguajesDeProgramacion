@@ -28,6 +28,6 @@ INSERT IGNORE INTO padron_electoral (dni, fecha_nacimiento, votado, biometria_re
 ('10123456', '2001-07-05', FALSE, FALSE);
 
 INSERT IGNORE INTO candidatos (id_candidato, nombre, partido, simbolo, foto, votos) VALUES
-(1, 'Ana Martínez', 'Partido Tecnológico', 'candidatos/candidato_1_simbolo.png', 'candidatos/candidato_1_foto.jpg', 0),
+(1, 'Leonel Martínez', 'Partido Tecnológico', 'candidatos/candidato_1_simbolo.png', 'candidatos/candidato_1_foto.jpg', 0),
 (2, 'Carlos Mendoza', 'Unión Digital', 'candidatos/candidato_2_simbolo.png', 'candidatos/candidato_2_foto.jpg', 0),
 (3, 'Voto en Blanco', 'N/A', NULL, NULL, 0);
